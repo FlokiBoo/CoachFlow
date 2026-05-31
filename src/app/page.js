@@ -8,12 +8,16 @@ import AthletesList from '@/components/athletes/AthletesList'
 import AthleteProfile from '@/components/athletes/AthleteProfile'
 import Calendar from '@/components/calendar/Calendar'
 import ExerciseLibrary from '@/components/library/ExerciseLibrary'
+import TemplatesList from '@/components/templates/TemplatesList'
+import TemplateEditor from '@/components/templates/TemplateEditor'
 import { athletes } from '@/data/athletes'
-import { templates } from '@/data/templates'
+import { templates as initialTemplates } from '@/data/templates'
 
 export default function Home() {
   const [activePage, setActivePage] = useState('dashboard')
   const [selectedAthlete, setSelectedAthlete] = useState(null)
+  const [templates, setTemplates] = useState(initialTemplates)
+  const [selectedTemplate, setSelectedTemplate] = useState(null)
 
   const handleSelectAthlete = (athlete) => {
     setSelectedAthlete(athlete)
@@ -28,6 +32,27 @@ export default function Home() {
   const openCalendar = (athlete) => {
     setSelectedAthlete(athlete)
     setActivePage('calendar')
+  }
+
+  const createTemplate = () => {
+    const newTemplate = {
+      id: Date.now(),
+      name: 'Nouveau template',
+      weeks: 1,
+    }
+    setSelectedTemplate(newTemplate)
+    setActivePage('template-editor')
+  }
+
+  const saveTemplate = (data) => {
+    setTemplates(prev => {
+      const exists = prev.find(t => t.id === selectedTemplate.id)
+      if (exists) {
+        return prev.map(t => t.id === selectedTemplate.id ? { ...t, ...data } : t)
+      }
+      return [...prev, { ...selectedTemplate, ...data }]
+    })
+    setActivePage('templates')
   }
 
   return (
@@ -72,10 +97,19 @@ export default function Home() {
         )}
 
         {activePage === 'templates' && (
-          <div style={{ padding: '24px' }}>
-            <h1 style={{ fontSize: '20px', fontWeight: '600' }}>📋 Templates</h1>
-            <p style={{ color: 'var(--text3)', marginTop: '8px' }}>En construction...</p>
-          </div>
+          <TemplatesList
+            templates={templates}
+            onSelect={(t) => { setSelectedTemplate(t); setActivePage('template-editor') }}
+            onCreate={createTemplate}
+          />
+        )}
+
+        {activePage === 'template-editor' && (
+          <TemplateEditor
+            template={selectedTemplate}
+            onBack={() => setActivePage('templates')}
+            onSave={saveTemplate}
+          />
         )}
 
         {activePage === 'messages' && (
