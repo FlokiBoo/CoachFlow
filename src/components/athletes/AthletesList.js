@@ -7,8 +7,7 @@ function initials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
 }
 
-export default function AthletesList({ athletes, onSelect }) {
-  const [search, setSearch] = useState('')
+export default function AthletesList({ athletes, onSelect, onNew }) {  const [search, setSearch] = useState('')
 
   const filtered = athletes.filter(a =>
     a.name.toLowerCase().includes(search.toLowerCase())
@@ -18,8 +17,7 @@ export default function AthletesList({ athletes, onSelect }) {
     <div className={styles.page}>
       <div className={styles.topbar}>
         <h1 className={styles.title}>👥 Sportifs</h1>
-        <button className={styles.addBtn}>+ Nouveau sportif</button>
-      </div>
+<button className={styles.addBtn} onClick={onNew}>+ Nouveau sportif</button>      </div>
       <div className={styles.search}>
         <input
           type="text"
