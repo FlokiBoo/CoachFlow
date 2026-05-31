@@ -10,6 +10,7 @@ import Calendar from '@/components/calendar/Calendar'
 import ExerciseLibrary from '@/components/library/ExerciseLibrary'
 import TemplatesList from '@/components/templates/TemplatesList'
 import TemplateEditor from '@/components/templates/TemplateEditor'
+import MetricsPage from '@/components/metrics/MetricsPage'
 import { athletes } from '@/data/athletes'
 import { templates as initialTemplates } from '@/data/templates'
 
@@ -35,11 +36,7 @@ export default function Home() {
   }
 
   const createTemplate = () => {
-    const newTemplate = {
-      id: Date.now(),
-      name: 'Nouveau template',
-      weeks: 1,
-    }
+    const newTemplate = { id: Date.now(), name: 'Nouveau template', weeks: 1 }
     setSelectedTemplate(newTemplate)
     setActivePage('template-editor')
   }
@@ -47,9 +44,7 @@ export default function Home() {
   const saveTemplate = (data) => {
     setTemplates(prev => {
       const exists = prev.find(t => t.id === selectedTemplate.id)
-      if (exists) {
-        return prev.map(t => t.id === selectedTemplate.id ? { ...t, ...data } : t)
-      }
+      if (exists) return prev.map(t => t.id === selectedTemplate.id ? { ...t, ...data } : t)
       return [...prev, { ...selectedTemplate, ...data }]
     })
     setActivePage('templates')
@@ -92,9 +87,7 @@ export default function Home() {
           />
         )}
 
-        {activePage === 'library' && (
-          <ExerciseLibrary />
-        )}
+        {activePage === 'library' && <ExerciseLibrary />}
 
         {activePage === 'templates' && (
           <TemplatesList
@@ -111,6 +104,8 @@ export default function Home() {
             onSave={saveTemplate}
           />
         )}
+
+        {activePage === 'metrics' && <MetricsPage athletes={athletes} />}
 
         {activePage === 'messages' && (
           <div style={{ padding: '24px' }}>

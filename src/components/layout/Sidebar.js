@@ -8,6 +8,7 @@ const navItems = [
   { id: 'athletes', label: 'Sportifs', icon: '👥' },
   { id: 'library', label: 'Bibliothèque', icon: '📚', section: 'Contenu' },
   { id: 'templates', label: 'Templates', icon: '📋' },
+  { id: 'metrics', label: 'Metrics', icon: '📈' },
   { id: 'messages', label: 'Messages', icon: '💬', section: 'Communication' },
   { id: 'feedback', label: 'Feedback', icon: '⭐' },
 ]
