@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import styles from './Calendar.module.css'
+import { getCalendarDays, saveCalendarDay } from '@/lib/calendar'
 
 const DAYS_FR = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
 
@@ -29,7 +30,23 @@ export default function Calendar({ athlete, onBack }) {
   const [weekOffset, setWeekOffset] = useState(0)
   const [calData, setCalData] = useState({})
   const [hoveredDay, setHoveredDay] = useState(null)
-  const [modal, setModal] = useState(null) // { key, date, mode }
+  const [modal, setModal] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadCalendar()
+  }, [athlete.id])
+
+  const loadCalendar = async () => {
+    try {
+      const data = await getCalendarDays(athlete.id)
+      setCalData(data)
+    } catch (err) {
+      console.error('Error loading calendar:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const monday = getMonday(weekOffset)
   const sunday = new Date(monday)
@@ -50,10 +67,19 @@ export default function Calendar({ athlete, onBack }) {
 
   const closeModal = () => setModal(null)
 
-  const saveDay = (key, data) => {
-    setCalData(prev => ({ ...prev, [key]: { ...(prev[key] || {}), ...data } }))
+  const saveDay = async (key, data) => {
+    const newData = { ...(calData[key] || {}), ...data }
+    setCalData(prev => ({ ...prev, [key]: newData }))
+    try {
+      await saveCalendarDay(athlete.id, key, newData)
+    } catch (err) {
+      console.error('Error saving:', err)
+      alert('Erreur sauvegarde: ' + JSON.stringify(err))
+    }
     closeModal()
   }
+
+  if (loading) return <div style={{ padding: '24px', color: 'var(--text3)' }}>Chargement...</div>
 
   return (
     <div className={styles.page}>
@@ -89,11 +115,12 @@ export default function Calendar({ athlete, onBack }) {
             const key = dateKey(d)
             const data = calData[key] || {}
             return (
-<div
-  key={i}
-  className={`${styles.dayCol} ${isToday(d) ? styles.todayCol : ''}`}
-  onMouseEnter={() => setHoveredDay(key)}
->              
+              <div
+                key={i}
+                className={`${styles.dayCol} ${isToday(d) ? styles.todayCol : ''}`}
+                onMouseEnter={() => setHoveredDay(key)}
+                onMouseLeave={() => setHoveredDay(null)}
+              >
                 {hoveredDay === key && (
                   <div className={styles.hoverActions}>
                     <button onClick={() => openModal(key, d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' }), 'session')}>+ Séance</button>
@@ -109,9 +136,7 @@ export default function Calendar({ athlete, onBack }) {
                   </div>
                 )}
 
-                {data.isRecup && (
-                  <div className={styles.recup}>💤 Récup</div>
-                )}
+                {data.isRecup && <div className={styles.recup}>💤 Récup</div>}
 
                 {data.sessionName && (
                   <div className={styles.session} onClick={() => openModal(key, '', 'session')}>
@@ -144,7 +169,6 @@ function DayModal({ modal, data, onSave, onClose }) {
   const [noteVisible, setNoteVisible] = useState(data.noteVisible || false)
   const [sessionName, setSessionName] = useState(data.sessionName || '')
   const [blocks, setBlocks] = useState((data.blocks || []).join('\n'))
-  const [isRecup, setIsRecup] = useState(data.isRecup || false)
   const [mode, setMode] = useState(modal.mode)
 
   const handleSave = () => {
@@ -153,13 +177,12 @@ function DayModal({ modal, data, onSave, onClose }) {
       noteVisible,
       sessionName: mode === 'session' ? sessionName : data.sessionName,
       blocks: mode === 'session' ? blocks.split('\n').filter(Boolean) : data.blocks,
-      isRecup: mode === 'recup' ? true : false,
+      isRecup: mode === 'recup',
     })
   }
 
   return (
-    <div className={styles.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className={styles.modalBox}>
+<div className={styles.overlay}>      <div className={styles.modalBox}>
         <div className={styles.modalHeader}>
           <h3>{modal.dateLabel}</h3>
           <button onClick={onClose}>×</button>
@@ -167,18 +190,12 @@ function DayModal({ modal, data, onSave, onClose }) {
         <div className={styles.modalBody}>
           <div className={styles.modalSection}>
             <div className={styles.modalLabel}>📝 Note</div>
-            <textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
-              placeholder="Note de coaching..."
-              rows={3}
-            />
+            <textarea value={note} onChange={e => setNote(e.target.value)} placeholder="Note de coaching..." rows={3} />
             <label className={styles.visibilityCheck}>
               <input type="checkbox" checked={noteVisible} onChange={e => setNoteVisible(e.target.checked)} />
               Montrer au sportif
             </label>
           </div>
-
           <div className={styles.modalSection}>
             <div className={styles.modalLabel}>Type</div>
             <div className={styles.modeButtons}>
@@ -186,12 +203,11 @@ function DayModal({ modal, data, onSave, onClose }) {
               <button className={mode === 'recup' ? styles.modeActive : ''} onClick={() => setMode('recup')}>💤 Récup</button>
             </div>
           </div>
-
           {mode === 'session' && (
             <div className={styles.modalSection}>
               <div className={styles.modalLabel}>Nom de la séance</div>
               <input value={sessionName} onChange={e => setSessionName(e.target.value)} placeholder="Force Upper A..." />
-              <div className={styles.modalLabel} style={{ marginTop: 8 }}>Exercices (un par ligne)</div>
+              <div className={styles.modalLabel} style={{ marginTop: 8 }}>Exercices</div>
               <textarea value={blocks} onChange={e => setBlocks(e.target.value)} placeholder="Développé couché&#10;Squat..." rows={4} />
             </div>
           )}
