@@ -5,16 +5,22 @@ import styles from './AthleteProfile.module.css'
 
 export default function AthleteProfile({ athlete, onBack, onCalendar, onSave, onDelete }) {
   const [tab, setTab] = useState('info')
+  const [name, setName] = useState(athlete.name || '')
+  const [email, setEmail] = useState(athlete.email || '')
+  const [phone, setPhone] = useState(athlete.phone || '')
+  const [age, setAge] = useState(athlete.age || '')
+  const [height, setHeight] = useState(athlete.height || '')
+  const [weight, setWeight] = useState(athlete.weight || '')
 
   const handleSave = () => {
     if (!onSave) return
     onSave({
-      name: document.getElementById('pf-name')?.value || athlete.name,
-      email: document.getElementById('pf-email')?.value || '',
-      phone: document.getElementById('pf-phone')?.value || '',
-      age: parseInt(document.getElementById('pf-age')?.value) || null,
-      height: parseInt(document.getElementById('pf-height')?.value) || null,
-      weight: parseInt(document.getElementById('pf-weight')?.value) || null,
+      name,
+      email,
+      phone,
+      age: parseInt(age) || null,
+      height: parseInt(height) || null,
+      weight: parseFloat(weight) || null,
       objectives: athlete.objectives || [],
       secondaryObjectives: athlete.secondary_objectives || [],
       limitations: athlete.limitations || [],
@@ -25,7 +31,7 @@ export default function AthleteProfile({ athlete, onBack, onCalendar, onSave, on
     <div className={styles.page}>
       <div className={styles.topbar}>
         <button className={styles.backBtn} onClick={onBack}>← Retour</button>
-        <h2 className={styles.title}>{athlete.name}</h2>
+        <h2 className={styles.title}>{name}</h2>
         <button className={styles.calBtn} onClick={onCalendar}>📅 Calendrier</button>
         <button className={styles.saveBtn} onClick={handleSave}>✓ Enregistrer</button>
       </div>
@@ -44,15 +50,15 @@ export default function AthleteProfile({ athlete, onBack, onCalendar, onSave, on
               <div className={styles.fields}>
                 <div className={styles.field}>
                   <label>Nom complet</label>
-                  <input id="pf-name" type="text" defaultValue={athlete.name} />
+                  <input type="text" value={name} onChange={e => setName(e.target.value)} />
                 </div>
                 <div className={styles.field}>
                   <label>Email</label>
-                  <input id="pf-email" type="email" defaultValue={athlete.email} />
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} />
                 </div>
                 <div className={styles.field}>
                   <label>Téléphone</label>
-                  <input id="pf-phone" type="tel" defaultValue={athlete.phone} />
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} />
                 </div>
               </div>
             </div>
@@ -61,15 +67,15 @@ export default function AthleteProfile({ athlete, onBack, onCalendar, onSave, on
               <div className={styles.fields}>
                 <div className={styles.field}>
                   <label>Âge</label>
-                  <input id="pf-age" type="number" defaultValue={athlete.age} />
+                  <input type="number" value={age} onChange={e => setAge(e.target.value)} />
                 </div>
                 <div className={styles.field}>
                   <label>Taille (cm)</label>
-                  <input id="pf-height" type="number" defaultValue={athlete.height} />
+                  <input type="number" value={height} onChange={e => setHeight(e.target.value)} />
                 </div>
                 <div className={styles.field}>
                   <label>Poids (kg)</label>
-                  <input id="pf-weight" type="number" defaultValue={athlete.weight} />
+                  <input type="number" value={weight} onChange={e => setWeight(e.target.value)} />
                 </div>
               </div>
             </div>
