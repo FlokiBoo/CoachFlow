@@ -6,6 +6,7 @@ import DashboardStats from '@/components/dashboard/DashboardStats'
 import AthleteList from '@/components/dashboard/AthleteList'
 import AthletesList from '@/components/athletes/AthletesList'
 import AthleteProfile from '@/components/athletes/AthleteProfile'
+import Calendar from '@/components/calendar/Calendar'
 import { athletes } from '@/data/athletes'
 import { templates } from '@/data/templates'
 
@@ -23,13 +24,18 @@ export default function Home() {
     setActivePage('athletes')
   }
 
+  const openCalendar = (athlete) => {
+    setSelectedAthlete(athlete)
+    setActivePage('calendar')
+  }
+
   return (
     <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       <Sidebar activePage={activePage} onNavigate={setActivePage} />
-      <main style={{ flex: 1, overflow: 'auto', background: 'var(--bg2)' }}>
+      <main style={{ flex: 1, overflow: 'hidden', background: 'var(--bg2)' }}>
 
         {activePage === 'dashboard' && (
-          <div style={{ padding: '24px' }}>
+          <div style={{ padding: '24px', height: '100%', overflowY: 'auto' }}>
             <div style={{ marginBottom: '24px' }}>
               <h1 style={{ fontSize: '20px', fontWeight: '600' }}>📊 Dashboard</h1>
               <p style={{ color: 'var(--text3)', fontSize: '13px', marginTop: '4px' }}>
@@ -46,7 +52,18 @@ export default function Home() {
         )}
 
         {activePage === 'athlete-profile' && selectedAthlete && (
-          <AthleteProfile athlete={selectedAthlete} onBack={handleBack} />
+          <AthleteProfile
+            athlete={selectedAthlete}
+            onBack={handleBack}
+            onCalendar={() => openCalendar(selectedAthlete)}
+          />
+        )}
+
+        {activePage === 'calendar' && selectedAthlete && (
+          <Calendar
+            athlete={selectedAthlete}
+            onBack={() => setActivePage('athlete-profile')}
+          />
         )}
 
         {activePage === 'library' && (

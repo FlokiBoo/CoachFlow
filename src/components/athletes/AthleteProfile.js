@@ -3,11 +3,7 @@
 import { useState } from 'react'
 import styles from './AthleteProfile.module.css'
 
-function initials(name) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-}
-
-export default function AthleteProfile({ athlete, onBack }) {
+export default function AthleteProfile({ athlete, onBack, onCalendar }) {
   const [tab, setTab] = useState('info')
 
   return (
@@ -15,6 +11,7 @@ export default function AthleteProfile({ athlete, onBack }) {
       <div className={styles.topbar}>
         <button className={styles.backBtn} onClick={onBack}>← Retour</button>
         <h2 className={styles.title}>{athlete.name}</h2>
+        <button className={styles.calBtn} onClick={onCalendar}>📅 Calendrier</button>
         <button className={styles.saveBtn}>✓ Enregistrer</button>
       </div>
 
