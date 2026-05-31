@@ -70,7 +70,6 @@ export default function MetricsPage({ athletes }) {
   const [selectedMetric, setSelectedMetric] = useState(null)
   const [rmTab, setRmTab] = useState(1)
 
-  const ath = athletes.find(a => a.id === athId)
   const athRecords = records[athId] || {}
 
   const getBest = (key) => {
@@ -83,17 +82,11 @@ export default function MetricsPage({ athletes }) {
     const real1 = (athRecords[key] || []).filter(r => r.rm === 1)
     const for2 = (athRecords[key] || []).filter(r => r.rm === 2).sort((a, b) => new Date(b.date) - new Date(a.date))
     const for3 = (athRecords[key] || []).filter(r => r.rm === 3).sort((a, b) => new Date(b.date) - new Date(a.date))
-
     if (real1.length) return { val: Math.max(...real1.map(r => r.val)), source: '1RM réel' }
-
     const cands = []
     if (for2.length) cands.push({ val: epley(for2[0].val, 2), date: for2[0].date, source: '1RM estimé (2RM)' })
     if (for3.length) cands.push({ val: epley(for3[0].val, 3), date: for3[0].date, source: '1RM estimé (3RM)' })
-
-    if (cands.length) {
-      cands.sort((a, b) => new Date(b.date) - new Date(a.date))
-      return cands[0]
-    }
+    if (cands.length) { cands.sort((a, b) => new Date(b.date) - new Date(a.date)); return cands[0] }
     return null
   }
 
@@ -103,6 +96,16 @@ export default function MetricsPage({ athletes }) {
       [athId]: {
         ...(prev[athId] || {}),
         [key]: [...((prev[athId] || {})[key] || []), { rm, val: parseFloat(val), date, note }]
+      }
+    }))
+  }
+
+  const deleteRecord = (key, record) => {
+    setRecords(prev => ({
+      ...prev,
+      [athId]: {
+        ...(prev[athId] || {}),
+        [key]: ((prev[athId] || {})[key] || []).filter(r => r !== record)
       }
     }))
   }
@@ -137,6 +140,7 @@ export default function MetricsPage({ athletes }) {
           rmTab={rmTab}
           setRmTab={setRmTab}
           onAdd={(rm, val, date, note) => addRecord(selectedMetric.key, rm, val, date, note)}
+          onDelete={deleteRecord}
           onBack={() => setSelectedMetric(null)}
           rm1={get1RM(selectedMetric.key)}
         />
@@ -181,7 +185,7 @@ export default function MetricsPage({ athletes }) {
   )
 }
 
-function MetricDetail({ metricKey, metricName, metricUnit, records, rmTab, setRmTab, onAdd, onBack, rm1 }) {
+function MetricDetail({ metricKey, metricName, metricUnit, records, rmTab, setRmTab, onAdd, onDelete, onBack, rm1 }) {
   const [val, setVal] = useState('')
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10))
   const [note, setNote] = useState('')
@@ -242,6 +246,7 @@ function MetricDetail({ metricKey, metricName, metricUnit, records, rmTab, setRm
             <span className={styles.histVal}>{metricUnit === 'sec' ? formatTime(r.val) : r.val + ' ' + metricUnit}</span>
             {isKg && rmTab > 1 && <span className={styles.histEst}>≈ {epley(r.val, rmTab)}kg 1RM</span>}
             {r.note && <span className={styles.histNote}>{r.note}</span>}
+            <button className={styles.deleteBtn} onClick={() => onDelete(metricKey, r)}>×</button>
           </div>
         ))}
       </div>
