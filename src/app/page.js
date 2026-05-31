@@ -7,6 +7,7 @@ import AthleteList from '@/components/dashboard/AthleteList'
 import AthletesList from '@/components/athletes/AthletesList'
 import AthleteProfile from '@/components/athletes/AthleteProfile'
 import Calendar from '@/components/calendar/Calendar'
+import ExerciseLibrary from '@/components/library/ExerciseLibrary'
 import { athletes } from '@/data/athletes'
 import { templates } from '@/data/templates'
 
@@ -67,10 +68,7 @@ export default function Home() {
         )}
 
         {activePage === 'library' && (
-          <div style={{ padding: '24px' }}>
-            <h1 style={{ fontSize: '20px', fontWeight: '600' }}>📚 Bibliothèque</h1>
-            <p style={{ color: 'var(--text3)', marginTop: '8px' }}>En construction...</p>
-          </div>
+          <ExerciseLibrary />
         )}
 
         {activePage === 'templates' && (
